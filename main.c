@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <linux/time.h>
 
 // Default values
 #define DEFAULT_WIDTH 40
