@@ -26,6 +26,7 @@ typedef struct {
 
 // Global flag for cleanup
 static volatile int running = 1;
+double highestFPS = 1.0;
 
 // Function to hide cursor
 void hide_cursor() {
@@ -49,6 +50,8 @@ void cleanup() {
     show_cursor();
     printf("\033[H\033[J");  // Clear screen
     printf("\033[H");        // Move to home position
+  
+    printf("The highest FPS reached were: %f", highestFPS);
 }
 
 double get_time() {
@@ -174,57 +177,61 @@ Config parse_arguments(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-    // Set up signal handlers for clean exit
-    signal(SIGINT, handle_signal);
-    signal(SIGTERM, handle_signal);
-    
-    // Register cleanup function to run at exit
-    atexit(cleanup);
-    
-    Config config = parse_arguments(argc, argv);
-    
-    Ball ball = {
-        .x = config.width * 0.125,
-        .y = config.height * 0.25,
-        .dx = 1.0,
-        .dy = 0.5
-    };
-    
-    double last_time = get_time();
-    double last_fps_update = last_time;
-    int frame_count = 0;
-    double current_fps = 0.0;
-    double target_frame_time = config.max_fps > 0 ? 1.0 / config.max_fps : 0.0;
-    
-    // Hide cursor before starting
-    hide_cursor();
-    
-    // Main game loop
-    while (running) {
-        double frame_start_time = get_time();
-        
-        double current_time = frame_start_time;
-        double delta_time = current_time - last_time;
-        last_time = current_time;
-        
-        frame_count++;
-        if (current_time - last_fps_update >= FPS_UPDATE_INTERVAL) {
-            current_fps = frame_count / (current_time - last_fps_update);
-            frame_count = 0;
-            last_fps_update = current_time;
-        }
-        
-        update_position(&ball, delta_time, &config);
-        draw_frame(&ball, current_fps, &config);
-        
-        if (config.max_fps > 0) {
-            double frame_end_time = get_time();
-            double frame_time = frame_end_time - frame_start_time;
-            if (frame_time < target_frame_time) {
-                usleep((target_frame_time - frame_time) * 1000000);
-            }
-        } 
+  // Set up signal handlers for clean exit
+  signal(SIGINT, handle_signal);
+  signal(SIGTERM, handle_signal);
+
+  // Register cleanup function to run at exit
+  atexit(cleanup);
+
+  Config config = parse_arguments(argc, argv);
+
+  Ball ball = {
+    .x = config.width * 0.125,
+    .y = config.height * 0.25,
+    .dx = 1.0,
+    .dy = 0.5
+  };
+
+  double last_time = get_time();
+  double last_fps_update = last_time;
+  int frame_count = 0;
+  double current_fps = 0.0;
+  double target_frame_time = config.max_fps > 0 ? 1.0 / config.max_fps : 0.0;
+
+  // Hide cursor before starting
+  hide_cursor();
+
+  // Main game loop
+  while (running) {
+    double frame_start_time = get_time();
+
+    double current_time = frame_start_time;
+    double delta_time = current_time - last_time;
+    last_time = current_time;
+
+    frame_count++;
+    if (current_time - last_fps_update >= FPS_UPDATE_INTERVAL) {
+      current_fps = frame_count / (current_time - last_fps_update);
+      frame_count = 0;
+      last_fps_update = current_time;
     }
-    
-    return 0;
+
+    update_position(&ball, delta_time, &config);
+    draw_frame(&ball, current_fps, &config);
+
+    if (current_fps > highestFPS) {
+      highestFPS = current_fps;
+    }
+
+    if (config.max_fps > 0) {
+      double frame_end_time = get_time();
+      double frame_time = frame_end_time - frame_start_time;
+      if (frame_time < target_frame_time) {
+        usleep((target_frame_time - frame_time) * 1000000);
+      }
+    } 
+  }
+
+  return 0;
 }
