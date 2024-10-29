@@ -94,7 +94,7 @@ void draw_frame(Ball* ball, double fps, const Config* config) {
   } else {
     snprintf(fps_text, sizeof(fps_text), "%.1f FPS", fps);
   }
-  int fps_len = strlen(fps_text);
+  const int fps_len = strlen(fps_text);
   for (int i = 0; i < fps_len && i < config->width; i++) {
     screen[0][config->width - fps_len + i] = fps_text[i];
   }
@@ -142,7 +142,7 @@ void print_usage(const char* program_name) {
 
 int parse_positive_int(const char* str, const char* param_name) {
   char* endptr;
-  int value = (int)strtol(str, &endptr, 10);
+  const int value = strtol(str, &endptr, 10);
   if (*endptr != '\0' || value <= 0) {
     printf("Error: Invalid %s value '%s'. Must be a positive integer.\n", param_name, str);
     exit(1);
@@ -161,7 +161,8 @@ Config parse_arguments(int argc, char* argv[]) {
     if (strcmp(argv[i], "--help") == 0) {
       print_usage(argv[0]);
       exit(0);
-    } else if (strcmp(argv[i], "-w") == 0 && i + 1 < argc) {
+    }
+    if (strcmp(argv[i], "-w") == 0 && i + 1 < argc) {
       config.width = parse_positive_int(argv[++i], "width");
     } else if (strcmp(argv[i], "-h") == 0 && i + 1 < argc) {
       config.height = parse_positive_int(argv[++i], "height");
@@ -177,7 +178,7 @@ Config parse_arguments(int argc, char* argv[]) {
   return config;
 }
 
-int main(int argc, char* argv[]) {
+int main(const int argc, char* argv[]) {
   // Set up signal handlers for clean exit
   signal(SIGINT, handle_signal);
   signal(SIGTERM, handle_signal);
@@ -205,10 +206,10 @@ int main(int argc, char* argv[]) {
 
   // Main game loop
   while (running) {
-    double frame_start_time = get_time();
+    const double frame_start_time = get_time();
 
-    double current_time = frame_start_time;
-    double delta_time = current_time - last_time;
+    const double current_time = frame_start_time;
+    const double delta_time = current_time - last_time;
     last_time = current_time;
 
     frame_count++;
@@ -226,8 +227,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (config.max_fps > 0) {
-      double frame_end_time = get_time();
-      double frame_time = frame_end_time - frame_start_time;
+      const double frame_end_time = get_time();
+      const double frame_time = frame_end_time - frame_start_time;
       if (frame_time < target_frame_time) {
         usleep((target_frame_time - frame_time) * 1000000);
       }
