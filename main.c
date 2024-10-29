@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
-#include <linux/time.h>
 
 // Default values
 #define DEFAULT_WIDTH 40
@@ -42,7 +41,8 @@ void show_cursor() {
 }
 
 // Signal handler for clean exit
-void handle_signal(int sig) {
+void handle_signal(const int sig) {
+  (void) sig;
   running = 0;
 }
 
