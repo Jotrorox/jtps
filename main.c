@@ -11,6 +11,9 @@
 #define BALL_SPEED 30.0
 #define FPS_UPDATE_INTERVAL 0.5
 
+// Physics vars
+#define GRAVITY 9.81 // m/s²
+
 typedef struct {
   double x;
   double y;
@@ -67,6 +70,8 @@ void clear_screen() {
 }
 
 void update_position(Ball* ball, double delta_time, const Config* config) {
+  ball->dy += GRAVITY * delta_time;
+
   ball->x += ball->dx * BALL_SPEED * delta_time;
   ball->y += ball->dy * BALL_SPEED * delta_time;
 
